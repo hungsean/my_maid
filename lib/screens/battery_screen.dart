@@ -8,8 +8,8 @@ class BatteryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[900],
-      body: Center(
-        child: BatteryWidget(batteryLevel: 80),
+      body: const Center(
+        child: BatteryWidget(),
       ),
     );
   }

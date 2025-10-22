@@ -1,18 +1,80 @@
 import 'package:flutter/material.dart';
+import '../services/battery_service.dart';
 
-class BatteryWidget extends StatelessWidget {
-  final int batteryLevel;
+class BatteryWidget extends StatefulWidget {
+  const BatteryWidget({super.key});
 
-  const BatteryWidget({
-    super.key,
-    required this.batteryLevel,
-  });
+  @override
+  State<BatteryWidget> createState() => _BatteryWidgetState();
+}
+
+class _BatteryWidgetState extends State<BatteryWidget> {
+  final BatteryService _batteryService = BatteryService();
+  BatteryDisplayInfo? _batteryInfo;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBatteryInfo();
+    _listenToBatteryChanges();
+  }
+
+  Future<void> _loadBatteryInfo() async {
+    try {
+      final info = await _batteryService.getBatteryDisplayInfo();
+      if (mounted) {
+        setState(() {
+          _batteryInfo = info;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _listenToBatteryChanges() {
+    _batteryService.onBatteryStateChanged.listen((state) {
+      _loadBatteryInfo();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: Colors.white),
+      );
+    }
+
+    if (_batteryInfo == null) {
+      return const Center(
+        child: Text(
+          'Unable to get battery info',
+          style: TextStyle(color: Colors.white, fontSize: 18),
+        ),
+      );
+    }
+
+    final batteryLevel = _batteryInfo!.level;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        // Battery status text
+        Text(
+          _batteryInfo!.description,
+          style: const TextStyle(
+            fontSize: 20,
+            color: Colors.white70,
+          ),
+        ),
+        const SizedBox(height: 20),
         // Battery icon (body + head combined in a Row)
         Row(
           mainAxisSize: MainAxisSize.min,
@@ -34,11 +96,29 @@ class BatteryWidget extends StatelessWidget {
                     child: Container(
                       width: 200 * (batteryLevel / 100),
                       decoration: BoxDecoration(
-                        color: _getBatteryColor(),
+                        color: _getBatteryColor(batteryLevel),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
                   ),
+                  // Charging indicator
+                  if (_batteryInfo!.isCharging)
+                    const Center(
+                      child: Icon(
+                        Icons.bolt,
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                    ),
+                  // Plug indicator for full/connected states
+                  if (_batteryInfo!.shouldShowPlugIcon)
+                    const Center(
+                      child: Icon(
+                        Icons.power,
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -66,14 +146,29 @@ class BatteryWidget extends StatelessWidget {
             color: Colors.white,
           ),
         ),
+        // Low battery warning
+        if (_batteryInfo!.isLowBattery && !_batteryInfo!.isPluggedIn)
+          Padding(
+            padding: const EdgeInsets.only(top: 20),
+            child: Text(
+              _batteryInfo!.isCriticalBattery ? '⚠️ 電量極低！' : '⚠️ 電量偏低',
+              style: TextStyle(
+                fontSize: 18,
+                color: _batteryInfo!.isCriticalBattery
+                    ? Colors.red
+                    : Colors.orange,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
       ],
     );
   }
 
-  Color _getBatteryColor() {
-    if (batteryLevel > 50) {
+  Color _getBatteryColor(int level) {
+    if (level > 50) {
       return Colors.green;
-    } else if (batteryLevel > 20) {
+    } else if (level > 20) {
       return Colors.orange;
     } else {
       return Colors.red;
