@@ -47,3 +47,8 @@ app.*.map.json
 # macOS/Xcode
 *.pbxproj
 *.xcworkspace/
+
+# Flutter generated plugin files
+**/GeneratedPluginRegistrant.swift
+**/generated_plugin_registrant.cc
+**/generated_plugins.cmake
