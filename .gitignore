@@ -44,10 +44,6 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# macOS/Xcode
-*.pbxproj
-*.xcworkspace/
-
 # Flutter generated plugin files
 **/GeneratedPluginRegistrant.swift
 **/generated_plugin_registrant.cc
