@@ -32,9 +32,10 @@ class BatteryService {
   /// Check if device is plugged in (charging or connected but not charging)
   Future<bool> isPluggedIn() async {
     final state = await getBatteryState();
+    // Note: connectedNotCharging is removed because on some Android devices
+    // it's incorrectly reported when the device is actually unplugged
     return state == BatteryState.charging ||
-        state == BatteryState.full ||
-        state == BatteryState.connectedNotCharging;
+        state == BatteryState.full;
   }
 
   /// Get battery status description in Chinese
@@ -48,7 +49,7 @@ class BatteryService {
       case BatteryState.full:
         return '電池已充飽';
       case BatteryState.connectedNotCharging:
-        return '已插電（未充電）';
+        return '使用電池';
       case BatteryState.unknown:
         return '無法取得電池資訊';
     }
@@ -91,7 +92,7 @@ class BatteryDisplayInfo {
       case BatteryState.full:
         return '電池已充飽';
       case BatteryState.connectedNotCharging:
-        return '已插電（未充電）';
+        return '使用電池';
       case BatteryState.unknown:
         return '無法取得電池資訊';
     }
