@@ -38,6 +38,19 @@ dependencies:
   # Battery monitoring plugin
   battery_plus: ^7.0.0
 
+  # Network sync dependencies
+  # Service discovery (mDNS/Bonjour)
+  bonsoir: ^6.0.1
+
+  # WebSocket communication
+  web_socket_channel: ^3.0.1
+
+  # Device identification
+  uuid: ^4.5.1
+
+  # Local storage for pairing info
+  shared_preferences: ^2.3.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

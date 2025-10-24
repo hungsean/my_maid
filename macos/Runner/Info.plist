@@ -28,5 +28,11 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>需要區域網路權限以發現和連接其他裝置進行電池狀態同步</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_battery-sync._tcp</string>
+	</array>
 </dict>
 </plist>
