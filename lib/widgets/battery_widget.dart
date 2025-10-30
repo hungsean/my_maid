@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/battery_service.dart';
 
@@ -12,12 +13,15 @@ class _BatteryWidgetState extends State<BatteryWidget> {
   final BatteryService _batteryService = BatteryService();
   BatteryDisplayInfo? _batteryInfo;
   bool _isLoading = true;
+  Timer? _updateTimer;
+  StreamSubscription? _batteryStateSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadBatteryInfo();
     _listenToBatteryChanges();
+    _startPeriodicUpdate();
   }
 
   Future<void> _loadBatteryInfo() async {
@@ -39,9 +43,29 @@ class _BatteryWidgetState extends State<BatteryWidget> {
   }
 
   void _listenToBatteryChanges() {
-    _batteryService.onBatteryStateChanged.listen((state) {
+    _batteryStateSubscription =
+        _batteryService.onBatteryStateChanged.listen((state) {
       _loadBatteryInfo();
     });
+  }
+
+  /// Start periodic battery level update
+  /// This is especially important for iOS where battery level changes
+  /// don't always trigger state change events
+  void _startPeriodicUpdate() {
+    // Update every 30 seconds
+    _updateTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      if (mounted) {
+        _loadBatteryInfo();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _updateTimer?.cancel();
+    _batteryStateSubscription?.cancel();
+    super.dispose();
   }
 
   @override
